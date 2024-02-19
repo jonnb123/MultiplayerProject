@@ -4,6 +4,7 @@
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -39,6 +40,9 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMultiplayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &AMultiplayerCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMultiplayerCharacter::LookUp);
+	
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 }
 
