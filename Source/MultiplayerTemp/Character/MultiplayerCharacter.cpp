@@ -7,6 +7,8 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MultiplayerTemp/Weapon/Weapon.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AMultiplayerCharacter::AMultiplayerCharacter()
@@ -26,11 +28,26 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	OverheadWidget->SetupAttachment(RootComponent);
 }
 
+// this registers variables for replication
+void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// this replicates on the client that overlaps
+	DOREPLIFETIME_CONDITION(AMultiplayerCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
+
+
 // Called when the game starts or when spawned
 void AMultiplayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+}
+
+void AMultiplayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -48,6 +65,8 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
+
+
 
 void AMultiplayerCharacter::MoveForward(float Value)
 {
@@ -79,11 +98,35 @@ void AMultiplayerCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
-void AMultiplayerCharacter::Tick(float DeltaTime)
+void AMultiplayerCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
-	Super::Tick(DeltaTime);
-
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
 }
+
+void AMultiplayerCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
+
 
 
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MultiplayerTemp/Weapon/Weapon.h"
 #include "MultiplayerCharacter.generated.h"
 
 UCLASS()
@@ -18,6 +19,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SetOverlappingWeapon(AWeapon* Weapon);
 
 protected:
 	virtual void BeginPlay() override;
@@ -41,5 +46,14 @@ private:
 	// as this is private and read only need to allow pvt access
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;
+
+	// if replicated, as soon as it changes on the server, it will be set on all clients
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)	
+	class AWeapon* OverlappingWeapon;
+
+	// rep notifies have to be ufuncitons
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+	
 	
 };
