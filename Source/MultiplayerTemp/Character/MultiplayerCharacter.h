@@ -24,6 +24,8 @@ public:
 
 	void SetOverlappingWeapon(AWeapon* Weapon);
 
+	virtual void PostInitializeComponents() override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -31,10 +33,8 @@ protected:
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
+	void EquipButtonPressed();
 
-	
-
-	
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -50,6 +50,9 @@ private:
 	// if replicated, as soon as it changes on the server, it will be set on all clients
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)	
 	class AWeapon* OverlappingWeapon;
+
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* Combat;
 
 	// rep notifies have to be ufuncitons
 	UFUNCTION()

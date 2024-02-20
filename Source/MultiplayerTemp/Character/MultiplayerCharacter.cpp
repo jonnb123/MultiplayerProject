@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MultiplayerTemp/CombatComponents/CombatComponent.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -26,6 +27,9 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overhead Widget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
 }
 
 // this registers variables for replication
@@ -56,11 +60,14 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AMultiplayerCharacter::EquipButtonPressed);
+
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMultiplayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMultiplayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &AMultiplayerCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMultiplayerCharacter::LookUp);
+
 	
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -98,6 +105,14 @@ void AMultiplayerCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
+void AMultiplayerCharacter::EquipButtonPressed()
+{
+	if (Combat && HasAuthority())
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void AMultiplayerCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
@@ -111,6 +126,16 @@ void AMultiplayerCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 		{
 			OverlappingWeapon->ShowPickupWidget(true);
 		}
+	}
+}
+
+void AMultiplayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (Combat)
+	{
+		Combat->Character = this;
 	}
 }
 
