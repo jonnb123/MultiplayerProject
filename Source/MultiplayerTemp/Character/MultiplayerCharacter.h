@@ -26,6 +26,12 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+	bool IsWeaponEquipped();
+
+	bool IsAiming();
+
+	
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -34,6 +40,9 @@ protected:
 	void Turn(float Value);
 	void LookUp(float Value);
 	void EquipButtonPressed();
+	void CrouchButtonPressed();
+	void AimButtonPressed();
+	void AimButtonReleased();
 
 
 private:
@@ -53,6 +62,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
+
+	
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
 
 	// rep notifies have to be ufuncitons
 	UFUNCTION()

@@ -6,6 +6,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
+#include "Net/UnrealNetwork.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -13,18 +14,34 @@ UCombatComponent::UCombatComponent()
 	
 }
 
-
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
+void UCombatComponent::SetAiming(bool bIsAiming)
+{
+	// leave bAiming as we'd have to wait for the RPC to do bAiming
+	bAiming = bIsAiming;
+	ServerSetAiming(bIsAiming);
+}
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+}
+
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
 
 }
 
@@ -39,7 +56,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	{
 		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 	}
+	// Owner is replicated, so don't have to set the owner on clients
 	EquippedWeapon->SetOwner(Character);
-	EquippedWeapon->ShowPickupWidget(false);
+	
 }
 

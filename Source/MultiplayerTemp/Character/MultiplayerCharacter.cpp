@@ -30,6 +30,8 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 // this registers variables for replication
@@ -61,8 +63,11 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &AMultiplayerCharacter::EquipButtonPressed);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AMultiplayerCharacter::CrouchButtonPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &AMultiplayerCharacter::AimButtonPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AMultiplayerCharacter::AimButtonReleased);
 
-
+	
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMultiplayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMultiplayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &AMultiplayerCharacter::Turn);
@@ -107,7 +112,51 @@ void AMultiplayerCharacter::LookUp(float Value)
 
 void AMultiplayerCharacter::EquipButtonPressed()
 {
-	if (Combat && HasAuthority())
+	if (Combat)
+	{
+		if (HasAuthority()) // called from server
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else // called from client
+		{
+			ServerEquipButtonPressed();
+		}
+	}
+}
+
+void AMultiplayerCharacter::CrouchButtonPressed()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch();
+	}
+}
+
+void AMultiplayerCharacter::AimButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->SetAiming(true);
+	}
+}
+
+void AMultiplayerCharacter::AimButtonReleased()
+{
+	if (Combat)
+	{
+		Combat->SetAiming(false);
+	}
+}
+
+void AMultiplayerCharacter::ServerEquipButtonPressed_Implementation()
+{
+	// no need to check for authority, as RPC only executed on Server
+	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
@@ -139,6 +188,9 @@ void AMultiplayerCharacter::PostInitializeComponents()
 	}
 }
 
+
+
+
 void AMultiplayerCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
@@ -152,6 +204,14 @@ void AMultiplayerCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 }
 
 
+bool AMultiplayerCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
+}
 
+bool AMultiplayerCharacter::IsAiming()
+{
+	return (Combat && Combat->bAiming);
+}
 
 
