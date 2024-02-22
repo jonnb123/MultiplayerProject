@@ -4,6 +4,7 @@
 #include "CombatComponent.h"
 
 #include "Engine/SkeletalMeshSocket.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
@@ -29,6 +30,15 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	// leave bAiming as we'd have to wait for the RPC to do bAiming
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming);
+}
+
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (EquippedWeapon && Character)
+	{
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
+	}
 }
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
@@ -58,6 +68,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	// Owner is replicated, so don't have to set the owner on clients
 	EquippedWeapon->SetOwner(Character);
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
 	
 }
 
