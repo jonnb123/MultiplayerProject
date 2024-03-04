@@ -4,9 +4,11 @@
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerTemp/CombatComponents/CombatComponent.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
@@ -32,18 +34,10 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	Combat->SetIsReplicated(true);
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	// stop capsule from blocking camera
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
-
-// this registers variables for replication
-void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// this replicates on the client that overlaps
-	DOREPLIFETIME_CONDITION(AMultiplayerCharacter, OverlappingWeapon, COND_OwnerOnly);
-}
-
-
 
 // Called when the game starts or when spawned
 void AMultiplayerCharacter::BeginPlay()
@@ -54,6 +48,8 @@ void AMultiplayerCharacter::BeginPlay()
 void AMultiplayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	AimOffset(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -78,6 +74,14 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
+// this registers variables for replication
+void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// this replicates on the client that overlaps
+	DOREPLIFETIME_CONDITION(AMultiplayerCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
 
 
 void AMultiplayerCharacter::MoveForward(float Value)
@@ -151,6 +155,34 @@ void AMultiplayerCharacter::AimButtonReleased()
 	{
 		Combat->SetAiming(false);
 	}
+}
+
+void AMultiplayerCharacter::AimOffset(float DeltaTime)
+{
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	// this is the magnitude of the vector
+	float Speed = Velocity.Size();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (Speed == 0.f && !bIsInAir) // standing still and not jumping
+	{
+		FRotator CurrentAimRotation =  FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+	
+		// if moving the mouse, the character won't turn when stood still 
+		bUseControllerRotationYaw = false;
+	}
+	if (Speed > 0.f || bIsInAir) // running or jumping
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
 }
 
 void AMultiplayerCharacter::ServerEquipButtonPressed_Implementation()
