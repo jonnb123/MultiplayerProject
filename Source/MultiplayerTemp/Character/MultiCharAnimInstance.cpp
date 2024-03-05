@@ -32,6 +32,7 @@ void UMultiCharAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAccelerating = MultiplayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 
 	bWeaponEquipped = MultiplayerCharacter->IsWeaponEquipped();
+	EquippedWeapon = MultiplayerCharacter->GetEquippedWeapon();
 	bIsCrouched = MultiplayerCharacter->bIsCrouched;
 
 	bAiming = MultiplayerCharacter->IsAiming();
@@ -54,5 +55,17 @@ void UMultiCharAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	AO_Yaw = MultiplayerCharacter->GetAO_Yaw();
 	AO_Pitch = MultiplayerCharacter->GetAO_Pitch();
 
+	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && MultiplayerCharacter->GetMesh())
+	{
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), RTS_World);
+		// these two variables are necessary for transformtobonespace below
+		FVector OutPosition;
+		FRotator OutRotation;
+		// want the left hand to be relative to the character's right hand bone
+		MultiplayerCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(),
+			FRotator::ZeroRotator, OutPosition, OutRotation);
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+	}
 	
 }

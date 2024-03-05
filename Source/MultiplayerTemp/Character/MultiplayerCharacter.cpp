@@ -39,6 +39,12 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
+AWeapon* AMultiplayerCharacter::GetEquippedWeapon()
+{
+	if (Combat == nullptr) return nullptr;
+	return Combat->EquippedWeapon;
+}
+
 // Called when the game starts or when spawned
 void AMultiplayerCharacter::BeginPlay()
 {
@@ -183,6 +189,16 @@ void AMultiplayerCharacter::AimOffset(float DeltaTime)
 	}
 
 	AO_Pitch = GetBaseAimRotation().Pitch;
+
+	// value of pitch is being serialized if it goes below 0, so adjust for this here
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// Map pitch from [270, 360) to [-90, 0)
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+		
 }
 
 void AMultiplayerCharacter::ServerEquipButtonPressed_Implementation()
