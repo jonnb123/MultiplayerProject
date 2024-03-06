@@ -99,6 +99,14 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	}
 }
 
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
+}
+
 void AWeapon::OnRep_WeaponState()
 {
 	switch (WeaponState)

@@ -34,6 +34,8 @@ public:
 
 	void SetWeaponState(EWeaponState State);
 
+	void Fire();
+
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
@@ -68,7 +70,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	class UWidgetComponent* PickupWidget;
 
-	
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	class UAnimationAsset* FireAnimation;
 	
 
 	

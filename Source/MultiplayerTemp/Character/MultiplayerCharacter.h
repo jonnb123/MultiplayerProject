@@ -31,6 +31,8 @@ public:
 
 	bool IsAiming();
 
+	void PlayFireMontage(bool bAiming);
+
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 	AWeapon* GetEquippedWeapon();
@@ -50,6 +52,8 @@ protected:
 	void AimButtonReleased();
 	void AimOffset(float DeltaTime);
 	virtual void Jump() override;
+	void FireButtonPressed();
+	void FireButtonReleased();
 
 
 private:
@@ -85,6 +89,8 @@ private:
 	ETurningInPlace TurningInPlace;
 
 	void TurnInPlace(float DeltaTime);
-	
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	class UAnimMontage* FireWeaponMontage;
 	
 };

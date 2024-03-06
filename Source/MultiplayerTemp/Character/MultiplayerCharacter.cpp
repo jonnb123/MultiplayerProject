@@ -75,6 +75,8 @@ void AMultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AMultiplayerCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &AMultiplayerCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AMultiplayerCharacter::AimButtonReleased);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMultiplayerCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMultiplayerCharacter::FireButtonReleased);
 
 	
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMultiplayerCharacter::MoveForward);
@@ -170,6 +172,22 @@ void AMultiplayerCharacter::AimButtonReleased()
 	}
 }
 
+void AMultiplayerCharacter::FireButtonPressed()
+{
+	if (Combat)
+	{
+		Combat->FireButtonPressed(true);
+	}
+}
+
+void AMultiplayerCharacter::FireButtonReleased()
+{
+	if (Combat)
+	{
+		Combat->FireButtonPressed(false);
+	}
+}
+
 void AMultiplayerCharacter::AimOffset(float DeltaTime)
 {
 	if (Combat && Combat->EquippedWeapon == nullptr) return;
@@ -223,6 +241,8 @@ void AMultiplayerCharacter::Jump()
 		Super::Jump();
 	}
 }
+
+
 
 void AMultiplayerCharacter::TurnInPlace(float DeltaTime)
 {
@@ -296,9 +316,6 @@ void AMultiplayerCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-
-
-
 bool AMultiplayerCharacter::IsWeaponEquipped()
 {
 	return (Combat && Combat->EquippedWeapon);
@@ -307,6 +324,21 @@ bool AMultiplayerCharacter::IsWeaponEquipped()
 bool AMultiplayerCharacter::IsAiming()
 {
 	return (Combat && Combat->bAiming);
+}
+
+void AMultiplayerCharacter::PlayFireMontage(bool bAiming)
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireWeaponMontage)
+	{
+		AnimInstance->Montage_Play(FireWeaponMontage);
+		FName SectionName;
+		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+	
 }
 
 
