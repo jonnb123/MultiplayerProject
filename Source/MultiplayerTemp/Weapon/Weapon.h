@@ -34,7 +34,7 @@ public:
 
 	void SetWeaponState(EWeaponState State);
 
-	void Fire();
+	virtual void Fire(const FVector& HitTarget);
 
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 
@@ -72,6 +72,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	class UAnimationAsset* FireAnimation;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABulletShell> BulletShellClass;
 	
 
 	
