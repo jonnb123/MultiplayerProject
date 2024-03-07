@@ -88,6 +88,8 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	}
 }
 
+
+
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	// changing the weapon state here (i.e. on the server) results in rep notify being called
