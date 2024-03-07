@@ -49,8 +49,12 @@ protected:
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
+	void SetHUDCrosshairs(float DeltaTime);
+
 private:
 	class AMultiplayerCharacter* Character;
+	class AMultiplayerPlayerController* Controller;
+	class AMultiplayerHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
@@ -65,5 +69,7 @@ private:
 	float AimWalkSpeed;
 
 	bool bFireButtonPressed;
+
+	
 	
 };
