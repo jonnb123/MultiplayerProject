@@ -52,6 +52,12 @@ AWeapon* AMultiplayerCharacter::GetEquippedWeapon()
 	return Combat->EquippedWeapon;
 }
 
+FVector AMultiplayerCharacter::GetHitTarget() const
+{
+	if (Combat == nullptr) return FVector();
+	return Combat->HitTarget;
+}
+
 // Called when the game starts or when spawned
 void AMultiplayerCharacter::BeginPlay()
 {

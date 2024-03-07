@@ -64,6 +64,12 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	ETurningInPlace TurningInPlace;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	FRotator RightHandRotation;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bLocalllyControlled;
+
 	FRotator CharacterRotationLastFrame;
 	FRotator CharacterRotation;
 	FRotator DeltaRotation;

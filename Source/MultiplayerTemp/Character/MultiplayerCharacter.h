@@ -22,9 +22,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	void SetOverlappingWeapon(AWeapon* Weapon);
-
+	
 	virtual void PostInitializeComponents() override;
 
 	bool IsWeaponEquipped();
@@ -32,12 +30,6 @@ public:
 	bool IsAiming();
 
 	void PlayFireMontage(bool bAiming);
-
-	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
-	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
-	AWeapon* GetEquippedWeapon();
-	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
-
 
 protected:
 	virtual void BeginPlay() override;
@@ -92,5 +84,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	class UAnimMontage* FireWeaponMontage;
+
+	
+	// setters and getters
+public:
+	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
+	AWeapon* GetEquippedWeapon();
+	FVector GetHitTarget() const;
+	void SetOverlappingWeapon(AWeapon* Weapon);
 	
 };
