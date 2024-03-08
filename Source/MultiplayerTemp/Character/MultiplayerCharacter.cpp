@@ -37,6 +37,8 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	// stop capsule from blocking camera
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;

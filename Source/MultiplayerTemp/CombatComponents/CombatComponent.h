@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "MultiplayerTemp/HUD/MultiplayerHUD.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -79,6 +80,8 @@ private:
 	
 	FVector HitTarget;
 
+	FHUDPackage HUDPackage;
+
 	// aiming and fov
 
 	// fov when not aiming; set to the camera's fov in beginplay
@@ -87,8 +90,6 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ZoomedFOV = 30.f;
-
-	
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ZoomInterpSpeed = 20.f;

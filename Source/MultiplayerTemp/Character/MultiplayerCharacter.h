@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "MultiplayerTemp/BlasterTypes/TurningInPlace.h"
+#include "MultiplayerTemp/Interfaces/InteractWithCrosshairsInterface.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "MultiplayerCharacter.generated.h"
 
 UCLASS()
-class MULTIPLAYERTEMP_API AMultiplayerCharacter : public ACharacter
+class MULTIPLAYERTEMP_API AMultiplayerCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 
