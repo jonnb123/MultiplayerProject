@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MultiplayerTemp/MultiplayerTemp.h"
 #include "MultiplayerTemp/CombatComponents/CombatComponent.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
@@ -36,6 +37,7 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	// stop capsule from blocking camera
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
@@ -275,6 +277,12 @@ void AMultiplayerCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
+void AMultiplayerCharacter::MulticastHit_Implementation()
+{
+	// server and all machines will play this montage
+	PlayHitReactMontage();
+}
+
 void AMultiplayerCharacter::HideCameraIfCharacterClose()
 {
 	if (!IsLocallyControlled()) return;
@@ -370,5 +378,29 @@ void AMultiplayerCharacter::PlayFireMontage(bool bAiming)
 	}
 	
 }
+
+void AMultiplayerCharacter::PlayHitReactMontage()
+{
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
