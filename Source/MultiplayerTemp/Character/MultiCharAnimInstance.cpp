@@ -30,12 +30,12 @@ void UMultiCharAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	bIsInAir = MultiplayerCharacter->GetCharacterMovement()->IsFalling();
 	bIsAccelerating = MultiplayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
-
 	bWeaponEquipped = MultiplayerCharacter->IsWeaponEquipped();
 	EquippedWeapon = MultiplayerCharacter->GetEquippedWeapon();
 	bIsCrouched = MultiplayerCharacter->bIsCrouched;
 	bAiming = MultiplayerCharacter->IsAiming();
 	TurningInPlace = MultiplayerCharacter->GetTurningInPlace();
+	bRotateRootBone = MultiplayerCharacter->ShouldRotateRootBone();
 
 	// offset yaw for strafing
 	FRotator AimRotation = MultiplayerCharacter->GetBaseAimRotation();
