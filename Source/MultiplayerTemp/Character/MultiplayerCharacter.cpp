@@ -58,6 +58,11 @@ float AMultiplayerCharacter::CalculateSpeed()
 	return Velocity.Size();
 }
 
+void AMultiplayerCharacter::OnRep_Health()
+{
+	
+}
+
 AWeapon* AMultiplayerCharacter::GetEquippedWeapon()
 {
 	if (Combat == nullptr) return nullptr;
@@ -134,6 +139,7 @@ void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 	// this replicates on the client that overlaps
 	DOREPLIFETIME_CONDITION(AMultiplayerCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(AMultiplayerCharacter, Health);
 }
 
 

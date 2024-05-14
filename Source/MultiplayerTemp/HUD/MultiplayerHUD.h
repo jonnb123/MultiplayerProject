@@ -30,6 +30,15 @@ class MULTIPLAYERTEMP_API AMultiplayerHUD : public AHUD
 
 public:
 	virtual void DrawHUD() override;
+
+	UPROPERTY(EditAnywhere, Category = "Player stats")
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	
+	class UCharacterOverlay* CharacterOverlay;
+
+protected:
+	virtual void BeginPlay() override;
+	void AddCharacterOverlay();
 	
 private:
 	FHUDPackage HUDPackage;
