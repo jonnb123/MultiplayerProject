@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerTemp/MultiplayerTemp.h"
 #include "MultiplayerTemp/CombatComponents/CombatComponent.h"
+#include "MultiplayerTemp/PlayerController/MultiplayerPlayerController.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -86,6 +87,12 @@ void AMultiplayerCharacter::OnRep_ReplicatedMovement()
 void AMultiplayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MultiplayerPlayerController = Cast<AMultiplayerPlayerController>(Controller);
+	if (MultiplayerPlayerController)
+	{
+		MultiplayerPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 }
 
 void AMultiplayerCharacter::Tick(float DeltaTime)

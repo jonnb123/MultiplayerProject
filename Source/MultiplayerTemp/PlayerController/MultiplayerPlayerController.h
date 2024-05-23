@@ -14,4 +14,10 @@ class MULTIPLAYERTEMP_API AMultiplayerPlayerController : public APlayerControlle
 {
 	GENERATED_BODY()
 	
+public:
+	void SetHUDHealth(float Health, float MaxHealth);
+protected:
+	virtual void BeginPlay() override;
+private:
+	class AMultiplayerHUD* CharacterHUD;
 };

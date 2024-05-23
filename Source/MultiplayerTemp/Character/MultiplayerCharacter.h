@@ -122,7 +122,7 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
-	
+	class AMultiplayerPlayerController* MultiplayerPlayerController;
 	
 	// setters and getters
 public:
