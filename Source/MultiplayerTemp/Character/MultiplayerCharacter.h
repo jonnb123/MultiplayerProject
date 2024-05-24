@@ -17,27 +17,17 @@ class MULTIPLAYERTEMP_API AMultiplayerCharacter : public ACharacter, public IInt
 public:
 	
 	AMultiplayerCharacter();
-
 	virtual void Tick(float DeltaTime) override;
-	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
 	virtual void PostInitializeComponents() override;
-
 	bool IsWeaponEquipped();
-
 	bool IsAiming();
-
 	void PlayFireMontage(bool bAiming);
-	
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
-
 	// inherited from actor class
 	virtual void OnRep_ReplicatedMovement() override;
+	void UpdateHUDHealth();
+	void Elim();
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,6 +46,8 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 	void CalculateAO_Pitch();
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

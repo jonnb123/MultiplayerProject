@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "MultiplayerTemp/MultiplayerTemp.h"
 #include "MultiplayerTemp/CombatComponents/CombatComponent.h"
+#include "MultiplayerTemp/GameMode/MultiplayerGameMode.h"
 #include "MultiplayerTemp/PlayerController/MultiplayerPlayerController.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
@@ -61,6 +62,21 @@ float AMultiplayerCharacter::CalculateSpeed()
 
 void AMultiplayerCharacter::OnRep_Health()
 {
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
+
+void AMultiplayerCharacter::UpdateHUDHealth()
+{
+	MultiplayerPlayerController =  MultiplayerPlayerController == nullptr ? Cast<AMultiplayerPlayerController>(Controller) : MultiplayerPlayerController;
+	if (MultiplayerPlayerController)
+	{
+		MultiplayerPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void AMultiplayerCharacter::Elim()
+{
 	
 }
 
@@ -83,15 +99,17 @@ void AMultiplayerCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0.f;
 }
 
+
+
 // Called when the game starts or when spawned
 void AMultiplayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MultiplayerPlayerController = Cast<AMultiplayerPlayerController>(Controller);
-	if (MultiplayerPlayerController)
+	UpdateHUDHealth();
+	if (HasAuthority())
 	{
-		MultiplayerPlayerController->SetHUDHealth(Health, MaxHealth);
+		OnTakeAnyDamage.AddDynamic(this, &AMultiplayerCharacter::ReceiveDamage);
 	}
 }
 
@@ -225,7 +243,7 @@ void AMultiplayerCharacter::AimButtonReleased()
 
 void AMultiplayerCharacter::FireButtonPressed()
 {
-	if (Combat)
+	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->FireButtonPressed(true);
 	}
@@ -250,6 +268,26 @@ void AMultiplayerCharacter::CalculateAO_Pitch()
 		FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
+}
+
+void AMultiplayerCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+	
+	if (Health == 0.f)
+	{
+		AMultiplayerGameMode* MultiplayerGameMode = GetWorld()->GetAuthGameMode<AMultiplayerGameMode>();
+		if (MultiplayerGameMode)
+		{
+			MultiplayerPlayerController = MultiplayerPlayerController == nullptr ? Cast<AMultiplayerPlayerController>(Controller) : MultiplayerPlayerController;
+			AMultiplayerPlayerController* AttackerController = Cast<AMultiplayerPlayerController>(InstigatorController);
+			MultiplayerGameMode->PlayerEliminated(this, MultiplayerPlayerController, AttackerController);
+		}
+	}
+	
 }
 
 void AMultiplayerCharacter::AimOffset(float DeltaTime)
@@ -356,12 +394,6 @@ void AMultiplayerCharacter::TurnInPlace(float DeltaTime)
 			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		}
 	}
-}
-
-void AMultiplayerCharacter::MulticastHit_Implementation()
-{
-	// server and all machines will play this montage
-	PlayHitReactMontage();
 }
 
 void AMultiplayerCharacter::HideCameraIfCharacterClose()

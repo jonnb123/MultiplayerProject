@@ -49,7 +49,7 @@ void AProjectile::BeginPlay()
 		);
 	}
 
-	if (HasAuthority())
+	if (HasAuthority()) // will only register hit events on server
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 	}
@@ -58,11 +58,6 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	AMultiplayerCharacter* MultiplayerCharacter = Cast<AMultiplayerCharacter>(OtherActor);
-	if (MultiplayerCharacter)
-	{
-		MultiplayerCharacter->MulticastHit();
-	}
 	Destroy();
 }
 
