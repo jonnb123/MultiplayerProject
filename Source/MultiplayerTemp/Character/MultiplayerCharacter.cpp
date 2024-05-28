@@ -21,6 +21,8 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());
 	CameraBoom->TargetArmLength = 600.f;
@@ -66,6 +68,8 @@ void AMultiplayerCharacter::OnRep_Health()
 	PlayHitReactMontage();
 }
 
+
+
 void AMultiplayerCharacter::UpdateHUDHealth()
 {
 	MultiplayerPlayerController =  MultiplayerPlayerController == nullptr ? Cast<AMultiplayerPlayerController>(Controller) : MultiplayerPlayerController;
@@ -77,7 +81,25 @@ void AMultiplayerCharacter::UpdateHUDHealth()
 
 void AMultiplayerCharacter::Elim()
 {
+	MulticastElim();
+	GetWorldTimerManager().SetTimer(ElimTimer, this, &AMultiplayerCharacter::ElimTimerFinished, ElimDelay);
 	
+}
+
+
+void AMultiplayerCharacter::MulticastElim_Implementation()
+{
+	bElimmed = true;
+	PlayElimMontage();
+}
+
+void AMultiplayerCharacter::ElimTimerFinished()
+{
+	AMultiplayerGameMode* MultiplayerGameMode = GetWorld()->GetAuthGameMode<AMultiplayerGameMode>();
+	if (MultiplayerGameMode)
+	{
+		MultiplayerGameMode->RequestRespawn(this, Controller);
+	}
 }
 
 AWeapon* AMultiplayerCharacter::GetEquippedWeapon()
@@ -490,6 +512,15 @@ void AMultiplayerCharacter::PlayFireMontage(bool bAiming)
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 	
+}
+
+void AMultiplayerCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
+	}
 }
 
 void AMultiplayerCharacter::PlayHitReactMontage()

@@ -36,6 +36,7 @@ void UMultiCharAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bAiming = MultiplayerCharacter->IsAiming();
 	TurningInPlace = MultiplayerCharacter->GetTurningInPlace();
 	bRotateRootBone = MultiplayerCharacter->ShouldRotateRootBone();
+	bElimmed = MultiplayerCharacter->IsElimmed();
 
 	// offset yaw for strafing
 	FRotator AimRotation = MultiplayerCharacter->GetBaseAimRotation();

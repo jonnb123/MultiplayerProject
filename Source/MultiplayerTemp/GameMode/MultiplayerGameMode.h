@@ -16,4 +16,6 @@ class MULTIPLAYERTEMP_API AMultiplayerGameMode : public AGameMode
 
 public:
 	virtual void PlayerEliminated(class AMultiplayerCharacter* EliminatedCharacter, class AMultiplayerPlayerController* VictimController, AMultiplayerPlayerController* AttackerController);
+
+	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);
 };

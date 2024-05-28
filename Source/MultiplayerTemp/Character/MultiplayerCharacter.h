@@ -24,10 +24,16 @@ public:
 	bool IsWeaponEquipped();
 	bool IsAiming();
 	void PlayFireMontage(bool bAiming);
+	void PlayElimMontage();
 	// inherited from actor class
 	virtual void OnRep_ReplicatedMovement() override;
 	void UpdateHUDHealth();
+
+	// Elim is not multicast, so it's only called on the server
 	void Elim();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim();
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,7 +93,10 @@ private:
 	class UAnimMontage* FireWeaponMontage;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
-	class UAnimMontage* HitReactMontage;
+	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
 	
 	void HideCameraIfCharacterClose();
 
@@ -115,6 +124,16 @@ private:
 	void OnRep_Health();
 
 	class AMultiplayerPlayerController* MultiplayerPlayerController;
+
+	bool bElimmed = false;
+
+	// elim timer
+	FTimerHandle ElimTimer;
+	
+	void ElimTimerFinished();
+	
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
 	
 	// setters and getters
 public:
@@ -123,6 +142,7 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
