@@ -84,6 +84,10 @@ void AMultiplayerCharacter::UpdateHUDHealth()
 
 void AMultiplayerCharacter::Elim()
 {
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Dropped();
+	}
 	MulticastElim();
 	GetWorldTimerManager().SetTimer(ElimTimer, this, &AMultiplayerCharacter::ElimTimerFinished, ElimDelay);
 	
@@ -94,7 +98,7 @@ void AMultiplayerCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
-
+	
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
@@ -108,6 +112,16 @@ void AMultiplayerCharacter::MulticastElim_Implementation()
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
 	}
 	StartDissolve();
+
+	// disable character movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (MultiplayerPlayerController)
+	{
+		DisableInput(MultiplayerPlayerController);
+	}
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AMultiplayerCharacter::ElimTimerFinished()
