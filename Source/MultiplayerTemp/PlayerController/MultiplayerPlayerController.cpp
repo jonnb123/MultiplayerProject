@@ -5,8 +5,29 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 #include "MultiplayerTemp/HUD/MultiplayerHUD.h"
 #include "MultiplayerTemp/HUD/CharacterOverlay.h"
+
+
+
+void AMultiplayerPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CharacterHUD = Cast<AMultiplayerHUD>(GetHUD());
+}
+
+void AMultiplayerPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	if (AMultiplayerCharacter* MultiplayerCharacter = Cast<AMultiplayerCharacter>(InPawn))
+	{
+		SetHUDHealth(MultiplayerCharacter->GetHealth(), MultiplayerCharacter->GetMaxHealth());
+	}
+	
+}
 
 void AMultiplayerPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -23,11 +44,4 @@ void AMultiplayerPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		CharacterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
-}
-
-void AMultiplayerPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CharacterHUD = Cast<AMultiplayerHUD>(GetHUD());
 }
