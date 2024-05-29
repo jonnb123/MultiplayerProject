@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "MultiplayerTemp/BlasterTypes/TurningInPlace.h"
 #include "MultiplayerTemp/Interfaces/InteractWithCrosshairsInterface.h"
@@ -134,6 +135,27 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay = 3.f;
+
+	// dissolve effect
+	
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
+
+	// dynamic instance we change at runtime
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// material instance set on BP, used with dynamic material instance
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DissolveMaterialInstance;
 	
 	// setters and getters
 public:

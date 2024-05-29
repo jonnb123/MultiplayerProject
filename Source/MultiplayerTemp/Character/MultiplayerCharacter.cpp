@@ -52,6 +52,9 @@ AMultiplayerCharacter::AMultiplayerCharacter()
 	// lowering these values increases lag between clients
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
+
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
+	
 }
 
 float AMultiplayerCharacter::CalculateSpeed()
@@ -91,6 +94,20 @@ void AMultiplayerCharacter::MulticastElim_Implementation()
 {
 	bElimmed = true;
 	PlayElimMontage();
+
+	if (DissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+		GetMesh()->SetMaterial(1, DynamicDissolveMaterialInstance);
+		GetMesh()->SetMaterial(2, DynamicDissolveMaterialInstance);
+		GetMesh()->SetMaterial(3, DynamicDissolveMaterialInstance);
+
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 1.f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+	}
+	StartDissolve();
 }
 
 void AMultiplayerCharacter::ElimTimerFinished()
@@ -99,6 +116,24 @@ void AMultiplayerCharacter::ElimTimerFinished()
 	if (MultiplayerGameMode)
 	{
 		MultiplayerGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void AMultiplayerCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if (DynamicDissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), DissolveValue);
+	}
+}
+
+void AMultiplayerCharacter::StartDissolve()
+{
+	DissolveTrack.BindDynamic(this, &AMultiplayerCharacter::UpdateDissolveMaterial);
+	if (DissolveCurve && DissolveTimeline)
+	{
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+		DissolveTimeline->Play();
 	}
 }
 
