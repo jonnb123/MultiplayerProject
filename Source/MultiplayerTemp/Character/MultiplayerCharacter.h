@@ -28,13 +28,15 @@ public:
 	void PlayElimMontage();
 	// inherited from actor class
 	virtual void OnRep_ReplicatedMovement() override;
-	void UpdateHUDHealth();
 
 	// Elim is not multicast, so it's only called on the server
 	void Elim();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastElim();
+
+	void UpdateHUDHealth();
+	class AMultiplayerPlayerState* MultiplayerPlayerState;
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,7 +57,11 @@ protected:
 	void CalculateAO_Pitch();
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	
 
+	// Poll for any relevant classes and initialize our Hud
+	void PollInit();
+	
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;

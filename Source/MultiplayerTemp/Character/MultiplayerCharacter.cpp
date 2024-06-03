@@ -13,6 +13,7 @@
 #include "MultiplayerTemp/CombatComponents/CombatComponent.h"
 #include "MultiplayerTemp/GameMode/MultiplayerGameMode.h"
 #include "MultiplayerTemp/PlayerController/MultiplayerPlayerController.h"
+#include "MultiplayerTemp/PlayerState/MultiplayerPlayerState.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
 #include "Net/UnrealNetwork.h"
 
@@ -79,6 +80,18 @@ void AMultiplayerCharacter::UpdateHUDHealth()
 	if (MultiplayerPlayerController)
 	{
 		MultiplayerPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void AMultiplayerCharacter::PollInit()
+{
+	if (!MultiplayerPlayerState)
+	{
+		MultiplayerPlayerState = GetPlayerState<AMultiplayerPlayerState>();
+		if (MultiplayerPlayerState)
+		{
+			MultiplayerPlayerState->AddToScore(0.f);
+		}
 	}
 }
 
@@ -202,6 +215,7 @@ void AMultiplayerCharacter::Tick(float DeltaTime)
 		CalculateAO_Pitch();
 	}
 	HideCameraIfCharacterClose();
+	PollInit();
 }
 
 // Called to bind functionality to input

@@ -45,3 +45,20 @@ void AMultiplayerPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		CharacterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
 }
+
+void AMultiplayerPlayerController::SetHUDScore(float Score)
+{
+	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+	bool bHudValid = CharacterHUD &&
+		CharacterHUD->CharacterOverlay &&
+			CharacterHUD->CharacterOverlay->ScoreAmount;
+
+	if (bHudValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		CharacterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+	}
+				
+
+}
+
