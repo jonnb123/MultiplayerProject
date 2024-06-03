@@ -18,8 +18,10 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
 	void OnPossess(APawn* InPawn) override;
+	void SetHUDDefeats(int32 Defeats);
 protected:
 	virtual void BeginPlay() override;
 private:
+	UPROPERTY()
 	class AMultiplayerHUD* CharacterHUD;
 };

@@ -29,6 +29,8 @@ void AMultiplayerPlayerController::OnPossess(APawn* InPawn)
 	
 }
 
+
+
 void AMultiplayerPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
@@ -58,7 +60,19 @@ void AMultiplayerPlayerController::SetHUDScore(float Score)
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
 		CharacterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
 	}
-				
+}
 
+void AMultiplayerPlayerController::SetHUDDefeats(int32 Defeats)
+{
+	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+	bool bHudValid = CharacterHUD &&
+		CharacterHUD->CharacterOverlay &&
+			CharacterHUD->CharacterOverlay->DefeatsAmount;
+
+	if (bHudValid)
+	{
+		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
+		CharacterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
 }
 

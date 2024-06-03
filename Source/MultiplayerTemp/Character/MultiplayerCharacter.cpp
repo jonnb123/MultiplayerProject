@@ -91,6 +91,7 @@ void AMultiplayerCharacter::PollInit()
 		if (MultiplayerPlayerState)
 		{
 			MultiplayerPlayerState->AddToScore(0.f);
+			MultiplayerPlayerState->AddToDefeats(0);
 		}
 	}
 }

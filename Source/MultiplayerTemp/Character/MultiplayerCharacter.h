@@ -36,6 +36,8 @@ public:
 	void MulticastElim();
 
 	void UpdateHUDHealth();
+
+	UPROPERTY()
 	class AMultiplayerPlayerState* MultiplayerPlayerState;
 
 protected:
