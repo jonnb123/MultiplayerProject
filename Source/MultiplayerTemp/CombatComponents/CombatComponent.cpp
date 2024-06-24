@@ -30,6 +30,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
+	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly); // will only replicated to owning client
+	
 
 }
 
@@ -78,7 +80,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (bCanFire)
+	if (CanFire())
 	{
 		bCanFire = false;
 		ServerFire(HitTarget);
@@ -110,6 +112,14 @@ void UCombatComponent::FireTimerFinished()
 		Fire();
 	}
 }
+
+bool UCombatComponent::CanFire()
+{
+	if (EquippedWeapon == nullptr) return false;
+	return !EquippedWeapon->IsEmpty() || !bCanFire;
+}
+
+
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
@@ -318,4 +328,6 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	}
 }
 
-
+void UCombatComponent::OnRep_CarriedAmmo()
+{
+}

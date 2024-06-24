@@ -132,7 +132,7 @@ public:
 
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 
-
+	bool IsEmpty();
 	
 	void SetWeaponState(EWeaponState State);
 

@@ -90,3 +90,17 @@ void AMultiplayerPlayerController::SetHUDWeaponAmmo(int32 Ammo)
 	}
 }
 
+void AMultiplayerPlayerController::SetHUDCarriedAmmo(int32 Ammo)
+{
+	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+	bool bHudValid = CharacterHUD &&
+		CharacterHUD->CharacterOverlay &&
+			CharacterHUD->CharacterOverlay->CarriedAmmoAmount;
+
+	if (bHudValid)
+	{
+		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
+		CharacterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+}
+
