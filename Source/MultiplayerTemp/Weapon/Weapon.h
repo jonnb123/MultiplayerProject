@@ -29,6 +29,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnRep_Owner() override;
+	void SetHUDAmmo();
 
 	void ShowPickupWidget(bool bShowWidget);
 	
@@ -93,6 +95,22 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ABulletShell> BulletShellClass;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	int32 Ammo;
+
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+	int32 MagCapacity;
+
+	UPROPERTY()
+	class AMultiplayerCharacter* MultiplayerOwnerCharacter;
+	UPROPERTY()
+	class AMultiplayerPlayerController* MultiplayerOwnerController;
 
 	// Zoomed FOV whilst aiming
 	UPROPERTY(EditAnywhere)

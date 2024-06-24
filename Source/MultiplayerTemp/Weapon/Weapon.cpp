@@ -9,6 +9,7 @@
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "MultiplayerTemp/PlayerController/MultiplayerPlayerController.h"
 
 
 // Sets default values
@@ -67,7 +68,11 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
+	
 }
+
+
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -135,6 +140,49 @@ void AWeapon::OnRep_WeaponState()
 	}
 }
 
+void AWeapon::SetHUDAmmo()
+{
+	MultiplayerOwnerCharacter = MultiplayerOwnerCharacter == nullptr ? Cast<AMultiplayerCharacter>(GetOwner()) : MultiplayerOwnerCharacter;
+	if (MultiplayerOwnerCharacter)
+	{
+		MultiplayerOwnerController = MultiplayerOwnerController == nullptr ? Cast<AMultiplayerPlayerController>(MultiplayerOwnerCharacter->Controller) : MultiplayerOwnerController;
+		if (MultiplayerOwnerController)
+		{
+			MultiplayerOwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
+}
+
+void AWeapon::SpendRound()
+{
+	Ammo--;
+	SetHUDAmmo();
+}
+
+
+void AWeapon::OnRep_Ammo()
+{
+	MultiplayerOwnerCharacter = MultiplayerOwnerCharacter == nullptr ? Cast<AMultiplayerCharacter>(GetOwner()) : MultiplayerOwnerCharacter;
+	SetHUDAmmo();
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+	if (Owner == nullptr)
+	{
+		MultiplayerOwnerCharacter = nullptr;
+		MultiplayerOwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
+	}
+	
+}
+
+
+
 
 void AWeapon::Fire(const FVector& HitTarget)
 {
@@ -160,6 +208,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
+	SpendRound();
 }
 
 void AWeapon::Dropped()
@@ -168,7 +217,8 @@ void AWeapon::Dropped()
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);
 	SetOwner(nullptr);
-	
+	MultiplayerOwnerCharacter = nullptr;
+	MultiplayerOwnerController = nullptr;
 }
 
 

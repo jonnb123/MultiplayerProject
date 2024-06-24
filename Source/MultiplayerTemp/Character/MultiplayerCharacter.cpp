@@ -110,6 +110,10 @@ void AMultiplayerCharacter::Elim()
 
 void AMultiplayerCharacter::MulticastElim_Implementation()
 {
+	if (MultiplayerPlayerController)
+	{
+		MultiplayerPlayerController->SetHUDWeaponAmmo(0);
+	}
 	bElimmed = true;
 	PlayElimMontage();
 	
