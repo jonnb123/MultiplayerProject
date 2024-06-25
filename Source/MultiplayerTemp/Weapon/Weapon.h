@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
+#include "WeaponTypes.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -112,6 +113,10 @@ private:
 	UPROPERTY()
 	class AMultiplayerPlayerController* MultiplayerOwnerController;
 
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
+	
+
 	// Zoomed FOV whilst aiming
 	UPROPERTY(EditAnywhere)
 	float ZoomedFOV = 30.f;
@@ -131,6 +136,8 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
+
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 
 	bool IsEmpty();
 	
