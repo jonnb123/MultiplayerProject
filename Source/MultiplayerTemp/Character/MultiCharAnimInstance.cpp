@@ -76,10 +76,9 @@ void UMultiCharAnimInstance::NativeUpdateAnimation(float DeltaTime)
 				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - MultiplayerCharacter->GetHitTarget()));
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaTime, 30.f);
 		}
-		
-		
 	}
 	
+	bUseFABRIK = MultiplayerCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }
 
 

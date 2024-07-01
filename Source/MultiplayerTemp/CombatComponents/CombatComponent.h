@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "MultiplayerTemp/BlasterTypes/CombatState.h"
 #include "MultiplayerTemp/HUD/MultiplayerHUD.h"
 #include "MultiplayerTemp/Weapon/WeaponTypes.h"
 #include "CombatComponent.generated.h"
@@ -28,6 +29,9 @@ public:
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
 	void Reload();
+	UFUNCTION(BlueprintCallable)
+	void FinishedReloading();
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,6 +61,8 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
+
+	void HandleReload();
 
 private:
 	UPROPERTY()
@@ -129,5 +135,11 @@ private:
 	int32 StartingARAmmo = 30;
 	
 	void InitializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CombatState();
 	
 };

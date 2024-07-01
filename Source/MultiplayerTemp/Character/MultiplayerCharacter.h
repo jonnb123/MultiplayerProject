@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
+#include "MultiplayerTemp/BlasterTypes/CombatState.h"
 #include "MultiplayerTemp/BlasterTypes/TurningInPlace.h"
 #include "MultiplayerTemp/Interfaces/InteractWithCrosshairsInterface.h"
 #include "MultiplayerTemp/Weapon/Weapon.h"
@@ -81,7 +82,7 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)	
 	class AWeapon* OverlappingWeapon;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
 	
 	UFUNCTION(Server, Reliable)
@@ -184,6 +185,7 @@ public:
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	ECombatState GetCombatState() const;
 	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;

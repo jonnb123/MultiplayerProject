@@ -169,17 +169,9 @@ void AMultiplayerCharacter::StartDissolve()
 	}
 }
 
-AWeapon* AMultiplayerCharacter::GetEquippedWeapon()
-{
-	if (Combat == nullptr) return nullptr;
-	return Combat->EquippedWeapon;
-}
 
-FVector AMultiplayerCharacter::GetHitTarget() const
-{
-	if (Combat == nullptr) return FVector();
-	return Combat->HitTarget;
-}
+
+
 
 void AMultiplayerCharacter::OnRep_ReplicatedMovement()
 {
@@ -635,6 +627,23 @@ void AMultiplayerCharacter::PlayHitReactMontage()
 }
 
 
+AWeapon* AMultiplayerCharacter::GetEquippedWeapon()
+{
+	if (Combat == nullptr) return nullptr;
+	return Combat->EquippedWeapon;
+}
+
+FVector AMultiplayerCharacter::GetHitTarget() const
+{
+	if (Combat == nullptr) return FVector();
+	return Combat->HitTarget;
+}
+
+ECombatState AMultiplayerCharacter::GetCombatState() const
+{
+	if (Combat == nullptr) return ECombatState::ECS_Max;
+	return Combat->CombatState;
+}
 
 
 

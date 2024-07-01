@@ -31,6 +31,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly); // will only replicated to owning client
+	DOREPLIFETIME(UCombatComponent, CombatState);
+
 	
 
 }
@@ -174,19 +176,48 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	
 }
 
+
+
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0)
+	if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
 	{
 		ServerReload();
 	}
 }
 
+
+
 void UCombatComponent::ServerReload_Implementation()
 {
 	if (Character == nullptr) return;
+	CombatState = ECombatState::ECS_Reloading;
+	HandleReload();
+}
 
+void UCombatComponent::FinishedReloading()
+{
+	if (Character == nullptr) return;
+	if (Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+}
+
+void UCombatComponent::OnRep_CombatState()
+{
+	switch (CombatState)
+	{
+		case ECombatState::ECS_Reloading:
+			HandleReload();
+			break;
+	}
+}
+
+void UCombatComponent::HandleReload()
+{
 	Character->PlayReloadMontage();
+
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
@@ -323,6 +354,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 
 
+
 void UCombatComponent::InterpFOV(float DeltaTime)
 {
 	if (EquippedWeapon == nullptr) return;
@@ -374,3 +406,14 @@ void UCombatComponent::InitializeCarriedAmmo()
 {
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AR, StartingARAmmo);
 }
+
+
+
+
+
+
+
+
+
+
+
