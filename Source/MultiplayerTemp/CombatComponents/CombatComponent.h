@@ -64,6 +64,8 @@ protected:
 
 	void HandleReload();
 
+	int32 AmountToReload();
+
 private:
 	UPROPERTY()
 	class AMultiplayerCharacter* Character;
@@ -141,5 +143,7 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	void UpdateAmmoValues();
 	
 };
