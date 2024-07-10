@@ -17,14 +17,20 @@ class MULTIPLAYERTEMP_API AMultiplayerPlayerController : public APlayerControlle
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
-	void OnPossess(APawn* InPawn) override;
+	virtual void OnPossess(APawn* InPawn) override;
 	void SetHUDDefeats(int32 Defeats);
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
+	void SetHUDMatchCountdown(float CountdownTime);
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
+	void SetHUDTime();
 private:
 	UPROPERTY()
 	class AMultiplayerHUD* CharacterHUD;
+
+	float MatchTime = 120.f;
+	uint32 CountdownInt = 0;
 };
