@@ -21,6 +21,8 @@ void AMultiplayerGameMode::BeginPlay()
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
 }
 
+
+
 void AMultiplayerGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -31,6 +33,20 @@ void AMultiplayerGameMode::Tick(float DeltaTime)
 		if (CountdownTime <= 0.f)
 		{
 			StartMatch();
+		}
+	}
+}
+
+void AMultiplayerGameMode::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		AMultiplayerPlayerController* MutiplayerPlayer = Cast<AMultiplayerPlayerController>(*It);
+		if (MutiplayerPlayer)
+		{
+			MutiplayerPlayer->OnMatchStateSet(MatchState);
 		}
 	}
 }

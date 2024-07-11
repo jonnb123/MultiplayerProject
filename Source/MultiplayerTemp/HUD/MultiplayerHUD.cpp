@@ -54,7 +54,6 @@ void AMultiplayerHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AddCharacterOverlay();
 }
 
 void AMultiplayerHUD::AddCharacterOverlay()

@@ -5,10 +5,11 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "GameFramework/GameMode.h"
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 #include "MultiplayerTemp/HUD/MultiplayerHUD.h"
 #include "MultiplayerTemp/HUD/CharacterOverlay.h"
-
+#include "Net/UnrealNetwork.h"
 
 
 void AMultiplayerPlayerController::BeginPlay()
@@ -24,7 +25,15 @@ void AMultiplayerPlayerController::Tick(float DeltaTime)
 
 	SetHUDTime();
 	CheckTimeSync(DeltaTime);
+	PollInit();
 	
+}
+
+void AMultiplayerPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AMultiplayerPlayerController, MatchState);
 }
 
 void AMultiplayerPlayerController::CheckTimeSync(float DeltaTime)
@@ -36,6 +45,8 @@ void AMultiplayerPlayerController::CheckTimeSync(float DeltaTime)
 		TimeSyncRunningTime = 0.f;
 	}
 }
+
+
 
 
 void AMultiplayerPlayerController::OnPossess(APawn* InPawn)
@@ -66,6 +77,12 @@ void AMultiplayerPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		CharacterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDHealth = Health;
+		HUDMaxHealth = MaxHealth;
+	}
 }
 
 void AMultiplayerPlayerController::SetHUDScore(float Score)
@@ -80,6 +97,11 @@ void AMultiplayerPlayerController::SetHUDScore(float Score)
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
 		CharacterHUD->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
 	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDScore = Score;
+	}
 }
 
 void AMultiplayerPlayerController::SetHUDDefeats(int32 Defeats)
@@ -93,6 +115,11 @@ void AMultiplayerPlayerController::SetHUDDefeats(int32 Defeats)
 	{
 		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
 		CharacterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+	else
+	{
+		bInitializeCharacterOverlay = true;
+		HUDDefeats = Defeats;
 	}
 }
 
@@ -155,7 +182,22 @@ void AMultiplayerPlayerController::SetHUDTime()
 	CountdownInt = SecondsLeft;
 }
 
-
+void AMultiplayerPlayerController::PollInit()
+{
+	if (CharacterOverlay == nullptr)
+	{
+		if (CharacterHUD && CharacterHUD->CharacterOverlay)
+		{
+			CharacterOverlay = CharacterHUD->CharacterOverlay;
+			if (CharacterOverlay)
+			{
+				SetHUDHealth(HUDHealth, HUDMaxHealth);
+				SetHUDScore(HUDScore);
+				SetHUDDefeats(HUDDefeats);
+			}
+		}
+	}
+}
 
 
 void AMultiplayerPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)
@@ -187,5 +229,31 @@ void AMultiplayerPlayerController::ReceivedPlayer()
 	if (IsLocalController())
 	{
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+	}
+}
+
+void AMultiplayerPlayerController::OnMatchStateSet(FName State)
+{
+	MatchState = State;
+
+	if (MatchState == MatchState::InProgress)
+	{
+		CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+		if (CharacterHUD)
+		{
+			CharacterHUD->AddCharacterOverlay();
+		}
+	}
+}
+
+void AMultiplayerPlayerController::OnRep_MatchState()
+{
+	if (MatchState == MatchState::InProgress)
+	{
+		CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+		if (CharacterHUD)
+		{
+			CharacterHUD->AddCharacterOverlay();
+		}
 	}
 }
