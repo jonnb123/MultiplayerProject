@@ -9,6 +9,32 @@
 #include "MultiplayerTemp/PlayerController/MultiplayerPlayerController.h"
 #include "MultiplayerTemp/PlayerState/MultiplayerPlayerState.h"
 
+AMultiplayerGameMode::AMultiplayerGameMode()
+{
+	bDelayedStart = true;
+}
+
+void AMultiplayerGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void AMultiplayerGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void AMultiplayerGameMode::PlayerEliminated(class AMultiplayerCharacter* EliminatedCharacter, class AMultiplayerPlayerController* VictimController, AMultiplayerPlayerController* AttackerController)
 {
 	AMultiplayerPlayerState* AttackerPlayerState = AttackerController ? Cast<AMultiplayerPlayerState>(AttackerController->PlayerState) : nullptr;
@@ -46,5 +72,7 @@ void AMultiplayerGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AControl
 		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
 	}
 }
+
+
 
 	
