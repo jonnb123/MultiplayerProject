@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/GameMode.h"
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
+#include "MultiplayerTemp/HUD/Announcement.h"
 #include "MultiplayerTemp/HUD/MultiplayerHUD.h"
 #include "MultiplayerTemp/HUD/CharacterOverlay.h"
 #include "Net/UnrealNetwork.h"
@@ -17,6 +18,10 @@ void AMultiplayerPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	CharacterHUD = Cast<AMultiplayerHUD>(GetHUD());
+	if (CharacterHUD)
+	{
+		CharacterHUD->AddAnnouncement();
+	}
 }
 
 void AMultiplayerPlayerController::Tick(float DeltaTime)
@@ -236,24 +241,37 @@ void AMultiplayerPlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
 
+	if(MatchState == MatchState::WaitingToStart)
+	{
+		
+	}
+
 	if (MatchState == MatchState::InProgress)
 	{
-		CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
-		if (CharacterHUD)
-		{
-			CharacterHUD->AddCharacterOverlay();
-		}
+		HandleMatchHasStarted();
 	}
 }
+
+
 
 void AMultiplayerPlayerController::OnRep_MatchState()
 {
 	if (MatchState == MatchState::InProgress)
 	{
-		CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
-		if (CharacterHUD)
+		HandleMatchHasStarted();
+	}
+}
+
+
+void AMultiplayerPlayerController::HandleMatchHasStarted()
+{
+	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+	if (CharacterHUD)
+	{
+		CharacterHUD->AddCharacterOverlay();
+		if (CharacterHUD->Announcement)
 		{
-			CharacterHUD->AddCharacterOverlay();
+			CharacterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }

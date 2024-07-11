@@ -2,7 +2,7 @@
 
 
 #include "MultiplayerHUD.h"
-
+#include "Announcement.h"
 #include "CharacterOverlay.h"
 #include "Blueprint/UserWidget.h"
 
@@ -50,6 +50,8 @@ void AMultiplayerHUD::DrawHUD()
 	}
 }
 
+
+
 void AMultiplayerHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -63,6 +65,16 @@ void AMultiplayerHUD::AddCharacterOverlay()
 	{
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
+	}
+}
+
+void AMultiplayerHUD::AddAnnouncement()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && AnnouncementClass)
+	{
+		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
+		Announcement->AddToViewport();
 	}
 }
 
