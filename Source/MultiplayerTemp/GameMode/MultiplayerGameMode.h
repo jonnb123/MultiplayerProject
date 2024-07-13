@@ -6,6 +6,12 @@
 #include "GameFramework/GameMode.h"
 #include "MultiplayerGameMode.generated.h"
 
+namespace MatchState
+{
+	// Match duration has been reached. Display winner and begin cooldown timer
+	extern MULTIPLAYERTEMP_API const FName Cooldown; 
+}
+
 /**
  * 
  */
@@ -25,6 +31,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	float MatchTime = 120.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float CooldownTime = 10.f;
 	
 	float LevelStartingTime = 0.f;
 

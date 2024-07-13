@@ -297,14 +297,13 @@ void AMultiplayerPlayerController::OnMatchStateSet(FName State)
 {
 	MatchState = State;
 
-	// if(MatchState == MatchState::WaitingToStart)
-	// {
-	// 	
-	// }
-
 	if (MatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
 	}
 }
 
@@ -315,6 +314,10 @@ void AMultiplayerPlayerController::OnRep_MatchState()
 	if (MatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+	}
+	else if (MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
 	}
 }
 
@@ -328,6 +331,19 @@ void AMultiplayerPlayerController::HandleMatchHasStarted()
 		if (CharacterHUD->Announcement)
 		{
 			CharacterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void AMultiplayerPlayerController::HandleCooldown()
+{
+	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
+	if (CharacterHUD)
+	{
+		CharacterHUD->CharacterOverlay->RemoveFromParent();
+		if (CharacterHUD->Announcement)
+		{
+			CharacterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
 }
