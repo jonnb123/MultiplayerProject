@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
+#include "MultiplayerTemp/GameState/MultiplayerGameState.h"
 #include "MultiplayerTemp/PlayerController/MultiplayerPlayerController.h"
 #include "MultiplayerTemp/PlayerState/MultiplayerPlayerState.h"
 
@@ -78,9 +79,13 @@ void AMultiplayerGameMode::PlayerEliminated(class AMultiplayerCharacter* Elimina
 	AMultiplayerPlayerState* AttackerPlayerState = AttackerController ? Cast<AMultiplayerPlayerState>(AttackerController->PlayerState) : nullptr;
 	AMultiplayerPlayerState* VictimPlayerState = VictimController ? Cast<AMultiplayerPlayerState>(VictimController->PlayerState) : nullptr;
 
-	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	AMultiplayerGameState* MultiplayerGameState = GetGameState<AMultiplayerGameState>();
+	
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && MultiplayerGameState)
 	{
 		AttackerPlayerState->AddToScore(1.f);
+		MultiplayerGameState->UpdateTopScore(AttackerPlayerState);
+		
 	}
 
 	if (VictimPlayerState)

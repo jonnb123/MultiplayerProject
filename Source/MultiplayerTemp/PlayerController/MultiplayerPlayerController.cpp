@@ -10,9 +10,11 @@
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
 #include "MultiplayerTemp/CombatComponents/CombatComponent.h"
 #include "MultiplayerTemp/GameMode/MultiplayerGameMode.h"
+#include "MultiplayerTemp/GameState/MultiplayerGameState.h"
 #include "MultiplayerTemp/HUD/Announcement.h"
 #include "MultiplayerTemp/HUD/MultiplayerHUD.h"
 #include "MultiplayerTemp/HUD/CharacterOverlay.h"
+#include "MultiplayerTemp/PlayerState/MultiplayerPlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -373,7 +375,36 @@ void AMultiplayerPlayerController::HandleCooldown()
 			CharacterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			FString AnnouncementText("New Match Starts In: ");
 			CharacterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
-			CharacterHUD->Announcement->InfoText->SetText(FText());
+
+			AMultiplayerGameState* MultiplayerGameState = Cast<AMultiplayerGameState>(UGameplayStatics::GetGameState(this));
+			AMultiplayerPlayerState* MultiplayerPlayerState = GetPlayerState<AMultiplayerPlayerState>();
+			if (MultiplayerGameState && MultiplayerPlayerState)
+			{
+				TArray<AMultiplayerPlayerState*> TopPlayers = MultiplayerGameState->TopScoringPlayers;
+				FString InfoTextString;
+				if (TopPlayers.Num() == 0)
+				{
+					InfoTextString = FString("There is no winner.");
+				}
+				else if (TopPlayers.Num() == 1 && TopPlayers[0] == MultiplayerPlayerState)
+				{
+					InfoTextString = FString("You are the winner!");
+				}
+				else if (TopPlayers.Num() == 1)
+				{
+					InfoTextString = FString::Printf(TEXT("Winner: \n%s"), *TopPlayers[0]->GetPlayerName());
+				}
+				else if (TopPlayers.Num() > 1)
+				{
+					InfoTextString = FString("Players tied for the win:\n");
+					for (auto TiedPlayer : TopPlayers)
+					{
+						InfoTextString.Append(FString::Printf(TEXT("%s\n"),*TiedPlayer->GetPlayerName()));
+					}
+				}
+				
+				CharacterHUD->Announcement->InfoText->SetText(FText::FromString(InfoTextString));
+			}
 		}
 	}
 	AMultiplayerCharacter* MultiplayerCharacter = Cast<AMultiplayerCharacter>(GetPawn());
