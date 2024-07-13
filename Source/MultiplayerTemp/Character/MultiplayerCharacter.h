@@ -38,9 +38,11 @@ public:
 	void MulticastElim();
 
 	void UpdateHUDHealth();
-
 	UPROPERTY()
 	class AMultiplayerPlayerState* MultiplayerPlayerState;
+
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,9 +65,9 @@ protected:
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	
-
 	// Poll for any relevant classes and initialize our Hud
 	void PollInit();
+	void RotateInPlace(float DeltaTime);
 	
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -186,6 +188,8 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	ECombatState GetCombatState() const;
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; } 
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;

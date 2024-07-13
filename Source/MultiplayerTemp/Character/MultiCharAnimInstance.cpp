@@ -79,8 +79,8 @@ void UMultiCharAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 	
 	bUseFABRIK = MultiplayerCharacter->GetCombatState() != ECombatState::ECS_Reloading;
-	bUseAimOffsets = MultiplayerCharacter->GetCombatState() != ECombatState::ECS_Reloading;
-	bTransformRightHand = MultiplayerCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+	bUseAimOffsets = MultiplayerCharacter->GetCombatState() != ECombatState::ECS_Reloading && !MultiplayerCharacter->GetDisableGameplay();
+	bTransformRightHand = MultiplayerCharacter->GetCombatState() != ECombatState::ECS_Reloading && !MultiplayerCharacter->GetDisableGameplay();
 
 
 }

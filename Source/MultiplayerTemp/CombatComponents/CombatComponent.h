@@ -31,6 +31,9 @@ public:
 	void Reload();
 	UFUNCTION(BlueprintCallable)
 	void FinishedReloading();
+
+	void FireButtonPressed(bool bPressed);
+
 	
 
 protected:
@@ -46,7 +49,6 @@ protected:
 	void OnRep_EquippedWeapon();
 	void Fire();
 
-	void FireButtonPressed(bool bPressed);
 
 	// reliable as firing weapon is v. important. Called from a client, executed on server
 	UFUNCTION(Server, Reliable)

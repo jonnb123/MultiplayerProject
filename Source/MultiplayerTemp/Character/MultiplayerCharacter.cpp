@@ -96,6 +96,8 @@ void AMultiplayerCharacter::PollInit()
 	}
 }
 
+
+
 void AMultiplayerCharacter::Elim()
 {
 	if (Combat && Combat->EquippedWeapon)
@@ -134,10 +136,7 @@ void AMultiplayerCharacter::MulticastElim_Implementation()
 	// disable character movement
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
-	if (MultiplayerPlayerController)
-	{
-		DisableInput(MultiplayerPlayerController);
-	}
+	bDisableGameplay = true;
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
@@ -198,6 +197,19 @@ void AMultiplayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	RotateInPlace(DeltaTime);
+	HideCameraIfCharacterClose();
+	PollInit();
+}
+
+void AMultiplayerCharacter::RotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	if (GetLocalRole() > ROLE_SimulatedProxy && IsLocallyControlled())
 	{
 		AimOffset(DeltaTime);
@@ -211,8 +223,6 @@ void AMultiplayerCharacter::Tick(float DeltaTime)
 		}
 		CalculateAO_Pitch();
 	}
-	HideCameraIfCharacterClose();
-	PollInit();
 }
 
 // Called to bind functionality to input
@@ -248,11 +258,14 @@ void AMultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	// this replicates on the client that overlaps
 	DOREPLIFETIME_CONDITION(AMultiplayerCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(AMultiplayerCharacter, Health);
+	DOREPLIFETIME(AMultiplayerCharacter, bDisableGameplay);
+
 }
 
 
 void AMultiplayerCharacter::MoveForward(float Value)
 {
+	if (bDisableGameplay) return;
 	if (Controller != nullptr && Value != 0.f)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -263,6 +276,7 @@ void AMultiplayerCharacter::MoveForward(float Value)
 
 void AMultiplayerCharacter::MoveRight(float Value)
 {
+	if (bDisableGameplay) return;
 	if (Controller != nullptr && Value != 0.f)
 	{
 		const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -283,6 +297,7 @@ void AMultiplayerCharacter::LookUp(float Value)
 
 void AMultiplayerCharacter::EquipButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		if (HasAuthority()) // called from server
@@ -298,6 +313,7 @@ void AMultiplayerCharacter::EquipButtonPressed()
 
 void AMultiplayerCharacter::CrouchButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -310,6 +326,7 @@ void AMultiplayerCharacter::CrouchButtonPressed()
 
 void AMultiplayerCharacter::ReloadButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->Reload();
@@ -318,6 +335,7 @@ void AMultiplayerCharacter::ReloadButtonPressed()
 
 void AMultiplayerCharacter::AimButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(true);
@@ -326,6 +344,7 @@ void AMultiplayerCharacter::AimButtonPressed()
 
 void AMultiplayerCharacter::AimButtonReleased()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->SetAiming(false);
@@ -334,6 +353,7 @@ void AMultiplayerCharacter::AimButtonReleased()
 
 void AMultiplayerCharacter::FireButtonPressed()
 {
+	if (bDisableGameplay) return;
 	if (Combat && Combat->EquippedWeapon)
 	{
 		Combat->FireButtonPressed(true);
@@ -342,6 +362,7 @@ void AMultiplayerCharacter::FireButtonPressed()
 
 void AMultiplayerCharacter::FireButtonReleased()
 {
+	if (bDisableGameplay) return;
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
@@ -453,6 +474,7 @@ void AMultiplayerCharacter::SimProxiesTurn()
 
 void AMultiplayerCharacter::Jump()
 {
+	if (bDisableGameplay) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();

@@ -8,6 +8,7 @@
 #include "GameFramework/GameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "MultiplayerTemp/Character/MultiplayerCharacter.h"
+#include "MultiplayerTemp/CombatComponents/CombatComponent.h"
 #include "MultiplayerTemp/GameMode/MultiplayerGameMode.h"
 #include "MultiplayerTemp/HUD/Announcement.h"
 #include "MultiplayerTemp/HUD/MultiplayerHUD.h"
@@ -62,16 +63,18 @@ void AMultiplayerPlayerController::ServerCheckMatchState_Implementation()
 	{
 		WarmupTime = GameMode->WarmupTime;
 		MatchTime = GameMode->MatchTime;
+		CooldownTime = GameMode->CooldownTime;
 		LevelStartingTime = GameMode->LevelStartingTime;
 		MatchState = GameMode->GetMatchState();
-		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, LevelStartingTime);
+		ClientJoinMidgame(MatchState, WarmupTime, MatchTime, CooldownTime, LevelStartingTime);
 	}
 }
 
-void AMultiplayerPlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch, float Warmup, float Match, float StartingTime)
+void AMultiplayerPlayerController::ClientJoinMidgame_Implementation(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime)
 {
 	WarmupTime = Warmup;
 	MatchTime = Match;
+	CooldownTime = Cooldown;
 	LevelStartingTime = StartingTime;
 	MatchState = StateOfMatch;
 	OnMatchStateSet(MatchState);
@@ -192,6 +195,11 @@ void AMultiplayerPlayerController::SetHUDMatchCountdown(float CountdownTime)
 
 	if (bHudValid)
 	{
+		if (CountdownTime < 0.f)
+		{
+			CharacterHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+			return;
+		}
 		int32 Minutes = FMath::FloorToInt(CountdownTime/60.f);
 		int32 Seconds = CountdownTime - Minutes * 60.f;
 		
@@ -210,6 +218,12 @@ void AMultiplayerPlayerController::SetHUDAnnouncementCountdown(float CountdownTi
 
 	if (bHudValid)
 	{
+		if (CountdownTime < 0.f)
+		{
+			CharacterHUD->Announcement->WarmupTime->SetText(FText());
+			return;
+		}
+		
 		int32 Minutes = FMath::FloorToInt(CountdownTime/60.f);
 		int32 Seconds = CountdownTime - Minutes * 60.f;
 		
@@ -225,12 +239,22 @@ void AMultiplayerPlayerController::SetHUDTime()
 	float TimeLeft = 0.f;
 	if (MatchState == MatchState::WaitingToStart) TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
 	else if (MatchState == MatchState::InProgress) TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
-	
+	else if (MatchState == MatchState::Cooldown) TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
 	
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
+
+	if (HasAuthority())
+	{
+		MultiplayerGameMode = MultiplayerGameMode == nullptr ? Cast<AMultiplayerGameMode>(UGameplayStatics::GetGameMode(this)) : MultiplayerGameMode;
+		if (MultiplayerGameMode)
+		{
+			SecondsLeft = FMath::CeilToInt(MultiplayerGameMode->GetCountdownTime() + LevelStartingTime);
+		}
+	}
+	
 	if (CountdownInt != SecondsLeft)
 	{
-		if(MatchState == MatchState::WaitingToStart)
+		if(MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown)
 		{
 			SetHUDAnnouncementCountdown(TimeLeft);
 		}
@@ -341,10 +365,22 @@ void AMultiplayerPlayerController::HandleCooldown()
 	if (CharacterHUD)
 	{
 		CharacterHUD->CharacterOverlay->RemoveFromParent();
-		if (CharacterHUD->Announcement)
+		bool bHUDValid = CharacterHUD->Announcement &&
+			CharacterHUD->Announcement->AnnouncementText &&
+			CharacterHUD->Announcement->InfoText;
+		if (bHUDValid)
 		{
 			CharacterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
+			FString AnnouncementText("New Match Starts In: ");
+			CharacterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
+			CharacterHUD->Announcement->InfoText->SetText(FText());
 		}
+	}
+	AMultiplayerCharacter* MultiplayerCharacter = Cast<AMultiplayerCharacter>(GetPawn());
+	if  (MultiplayerCharacter && MultiplayerCharacter->GetCombat())
+	{
+		MultiplayerCharacter->bDisableGameplay = true;
+		MultiplayerCharacter->GetCombat()->FireButtonPressed(false);
 	}
 }
 
