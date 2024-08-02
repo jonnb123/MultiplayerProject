@@ -92,7 +92,7 @@ private:
 
 	// HUD and crosshairs
 	
-	float  CrosshairVelocityFactor;
+	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
 	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
@@ -137,6 +137,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingARAmmo = 30;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingRocketAmmo = 0;
 	
 	void InitializeCarriedAmmo();
 

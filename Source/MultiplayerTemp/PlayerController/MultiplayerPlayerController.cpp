@@ -353,7 +353,7 @@ void AMultiplayerPlayerController::HandleMatchHasStarted()
 	CharacterHUD = CharacterHUD == nullptr ? Cast<AMultiplayerHUD>(GetHUD()) : CharacterHUD;
 	if (CharacterHUD)
 	{
-		CharacterHUD->AddCharacterOverlay();
+		if (CharacterHUD->CharacterOverlay == nullptr) CharacterHUD->AddCharacterOverlay();
 		if (CharacterHUD->Announcement)
 		{
 			CharacterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
